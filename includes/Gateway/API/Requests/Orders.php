@@ -469,6 +469,23 @@ class Orders extends API\Request {
 
 			$line_item->setAppliedTaxes( $applied_taxes );
 
+			// ADD METADATA AS NOTE.
+			$meta_datas = [];
+			$get_metadata = $item->get_meta_data();
+			if (!empty($get_metadata) && is_array($get_metadata)) {
+				foreach ($get_metadata as $key => $value) {
+					if ($value->key === '_addons_price') {
+						continue; // skip key _addons_price
+					}
+
+					$meta_datas[] = $value->key . ': ' . $value->value;
+				}
+			}
+			$meta_datas = implode(" | ", $meta_datas);
+
+			$line_item->setNote($meta_datas);
+
+
 			$api_line_items[] = $line_item;
 		}
 
