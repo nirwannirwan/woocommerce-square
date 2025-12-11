@@ -21,6 +21,7 @@ namespace WooCommerce\Square\Gateway\API\Requests;
 
 defined( 'ABSPATH' ) || exit;
 
+use DateTime;
 use WooCommerce\Square\API;
 use WooCommerce\Square\Framework\Square_Helper;
 use WooCommerce\Square\Handlers\Product;
@@ -229,7 +230,7 @@ class Orders extends API\Request {
 
 		} elseif ( FulfillmentType::PICKUP === $fulfillment_type ) {
 			$pickup_details = new \Square\Models\OrderFulfillmentPickupDetails();
-			$pickup_details->setScheduleType( 'ASAP' );
+			$pickup_details->setScheduleType( 'SCHEDULED' );
 
 			// Add recipient information for pickup.
 			$recipient = new \Square\Models\OrderFulfillmentRecipient();
@@ -247,6 +248,32 @@ class Orders extends API\Request {
 			$recipient->setAddress( $pickup_address );
 
 			$pickup_details->setRecipient( $recipient );
+
+			// Add pickup time information if available.
+			$pickup_date = $order->get_meta( 'wpc_pro_pickup_date' );
+			$pickup_time = $order->get_meta( 'wpc_pro_pickup_time' );
+			$formatted_pickup_datetime = null;
+
+			if ( ! empty( $pickup_date ) && ! empty( $pickup_time ) ) {
+				$pickup_datetime_str = $pickup_date . ' ' . $pickup_time;
+				$pickup_datetime = date_create_from_format( 'F j, Y g:i a', $pickup_datetime_str, wp_timezone() );
+
+				if ( $pickup_datetime ) {
+					$formatted_pickup_datetime = gmdate( 'Y-m-d\TH:i:s\Z', (int) $pickup_datetime->getTimestamp() );
+				}
+			}
+			
+			if ( $formatted_pickup_datetime ) {
+				$expired_datetime = new DateTime( $formatted_pickup_datetime );
+				$expired_datetime->modify( '+1 day' );
+				$formatted_expired_pickup_datetime = gmdate( 'Y-m-d\TH:i:s\Z', (int) $expired_datetime->getTimestamp() );
+
+				$pickup_details->setIsCurbsidePickup( false );
+				$pickup_details->setPickupAt( $formatted_pickup_datetime );
+				$pickup_details->setPrepTimeDuration( 'P0DT0H40M0S' ); // prep time of 40 minutes
+				$pickup_details->setAutoCompleteDuration( 'P1D' ); // auto complete after 1 day
+				$pickup_details->setExpiresAt( $formatted_expired_pickup_datetime ); // set to +1 day from pickup time
+			}
 
 			// Add customer note if available.
 			if ( $order->get_customer_note() ) {
