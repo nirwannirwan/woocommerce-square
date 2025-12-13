@@ -230,7 +230,7 @@ class Orders extends API\Request {
 
 		} elseif ( FulfillmentType::PICKUP === $fulfillment_type ) {
 			$pickup_details = new \Square\Models\OrderFulfillmentPickupDetails();
-			$pickup_details->setScheduleType( 'SCHEDULED' );
+			$pickup_details->setScheduleType( 'ASAP' );
 
 			// Add recipient information for pickup.
 			$recipient = new \Square\Models\OrderFulfillmentRecipient();
@@ -264,15 +264,10 @@ class Orders extends API\Request {
 			}
 			
 			if ( $formatted_pickup_datetime ) {
-				$expired_datetime = new DateTime( $formatted_pickup_datetime );
-				$expired_datetime->modify( '+1 day' );
-				$formatted_expired_pickup_datetime = gmdate( 'Y-m-d\TH:i:s\Z', (int) $expired_datetime->getTimestamp() );
-
 				$pickup_details->setIsCurbsidePickup( false );
 				$pickup_details->setPickupAt( $formatted_pickup_datetime );
 				$pickup_details->setPrepTimeDuration( 'P0DT0H40M0S' ); // prep time of 40 minutes
 				$pickup_details->setAutoCompleteDuration( 'P1D' ); // auto complete after 1 day
-				$pickup_details->setExpiresAt( $formatted_expired_pickup_datetime ); // set to +1 day from pickup time
 			}
 
 			// Add customer note if available.
