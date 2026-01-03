@@ -460,8 +460,14 @@ class Gateway extends Payment_Gateway_Direct {
 
 				$order->square_order_id = $response->getId();
 
+				$tip_total = 0;
+				foreach( $order->get_items('fee') as $item_id => $item_tip ){
+					// The fee total amount
+					$tip_total = Money_Utility::amount_to_cents( $item_tip->get_total() );
+				}
+				
 				// adjust order by difference between WooCommerce and Square order totals
-				$wc_total     = Money_Utility::amount_to_cents( $order->get_total() );
+				$wc_total     = Money_Utility::amount_to_cents( $order->get_total() ) - $tip_total; // exclude tip amount from adjustment
 				$square_total = $response->getTotalMoney()->getAmount();
 				$delta_total  = $wc_total - $square_total;
 

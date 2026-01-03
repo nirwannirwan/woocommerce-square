@@ -511,6 +511,17 @@ class Orders extends API\Request {
 			$api_line_items[] = $line_item;
 		}
 
+		// remove $api_line_items object if title contains 'Tip' on first line
+		$api_line_items = array_filter($api_line_items, function($line_item) {
+			if ($line_item instanceof \Square\Models\OrderLineItem) {
+				$name = $line_item->getName();
+				if (stripos($name, 'Tip') !== false) {
+					return false; // remove item
+				}
+			}
+			return true; // keep item
+		});
+
 		return $api_line_items;
 	}
 
