@@ -1,10 +1,10 @@
 === WooCommerce Square ===
 Contributors: woocommerce, automattic
 Tags: credit card, square, woocommerce, inventory sync
-Requires at least: 6.7
-Tested up to: 6.9
+Requires at least: 6.8
+Tested up to: 7.0
 Requires PHP: 7.4
-Stable tag: 5.2.0
+Stable tag: 5.3.2
 License: GPL-3.0-or-later
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -71,6 +71,28 @@ If you get stuck, you can ask for help in the [Plugin Forum](https://wordpress.o
 2. The payment gateway settings.
 
 == Changelog ==
+
+= 5.3.2 - 2026-04-06 =
+* Fix - Prevent stale Square catalog IDs from breaking checkout while still surfacing genuine coupon redemption failures as checkout errors.
+* Fix - Ensure that the order note wordings for partial payments are translatable.
+* Dev - Replace deprecated `wc_enqueue_js` with `wp_add_inline_script`.
+* Dev - Bump WordPress "Tested up to" to 7.0.
+* Dev - Bump WordPress minimum supported to 6.8.
+* Dev - Bump WooCommerce minimum supported version to 10.4.
+
+= 5.3.1 - 2026-03-26 =
+* Fix - Improved reliability when customers change or remove an applied gift card at checkout.
+* Fix - Improved authorization handling for order-related requests in the payment flow.
+* Dev - Bump WooCommerce "tested up to" version 10.6.
+
+= 5.3.0 - 2026-03-05 =
+* Add - Initial support for Square Discount Codes (Coupons).
+* Fix - Set the "Synced with Square" taxonomy to private.
+* Fix - Ensure that there is no `DivisionByZeroError` fatal error in Square when the total amount is zero and the tax amount is non-zero.
+* Fix - Partial-Total Verification when Gift Card is used.
+* Fix - Improved data access restrictions on payment method page.
+* Dev - Bump WooCommerce "tested up to" version 10.5.
+* Dev - Bump WooCommerce minimum supported version to 10.3.
 
 = 5.2.0 - 2026-01-15 =
 * Add - A notice for the inventory sync in bulk edit screen.
@@ -187,73 +209,6 @@ If you get stuck, you can ask for help in the [Plugin Forum](https://wordpress.o
 * Dev - Bump WordPress "tested up to" version 6.8.
 * Dev - Updates to E2E tests setup.
 * Dev - Update all third-party actions our workflows rely on to use versions based on specific commit hashes.
-
-= 4.8.8 - 2025-12-10 =
-* Security - Resolve CVE-2025-13457 for version 4.8.
-
-= 4.8.7 - 2025-03-06 =
-* Add - Support for syncing the "Mark as Sold Out" field value during inventory sync.
-* Fix - Ensure payment methods display the correct buttons and statuses in the new WooCommerce Payments settings.
-* Fix - Ensure that Cash App Pay works as expected on mobile devices.
-* Fix - Ensure that no blank order is created via the "Add Payment Method" when HPOS is enabled.
-* Dev - Disabled warning checks from WordPress Plugin Check Action.
-
-= 4.8.6 - 2025-02-10 =
-* Fix - Resolved "translation loading was triggered too early" issue in WordPress 6.7.
-* Fix - Refresh brand assets.
-* Dev - Bump WooCommerce "tested up to" version 9.7.
-* Dev - Bump WooCommerce minimum supported version to 9.5.
-* Dev - Bump WordPress minimum supported version to 6.6.
-* Dev - Add the WordPress Plugin Check GitHub Action.
-
-= 4.8.5 - 2025-01-20 =
-* Fix - Unblock the Checkout page UI, and show a generic error when buyer verification fails.
-* Fix - Ensure inventory sync works correctly for variable products when Square sync is enabled through quick or bulk edit.
-* Dev - Bump WooCommerce "tested up to" version 9.6.
-* Dev - Bump WooCommerce minimum supported version to 9.4.
-* Dev - Use the `@woocommerce/e2e-utils-playwright` NPM package for E2E tests.
-* Dev - Updates GitHub `actions/cache`, `actions/upload` and `actions/download` to v4 due to deprecation.
-
-= 4.8.4 - 2024-12-09 =
-* Fix - Resolved the product duplication issue on the Square side when WooCommerce is set as the SOR.
-* Fix - Remove `woocommerce_loop_add_to_cart_link` filter to standardize "Buy Gift Card" and "Add to Cart" button styles across themes.
-* Fix - Reposition payment error messages close to Payment Method form on the Classic Checkout page.
-* Dev - Bump WooCommerce "tested up to" version 9.5.
-* Dev - Bump WooCommerce minimum supported version to 9.3.
-* Dev - Group E2E tests using tags and run each group in parallel within the GitHub Actions workflow.
-* Dev - Resolved some failing E2E tests.
-
-= 4.8.3 - 2024-11-11 =
-* Fix – Ensure Square sync works without issues when using cached API responses.
-* Fix - Avoid a potential infinite loop during inventory pull.
-* Tweak - Change the maximum object retrieval limit from 100 to 50 to avoid timeout issues.
-* Dev - Bump WordPress "tested up to" version 6.7.
-* Dev - Bump WordPress minimum supported version to 6.5.
-
-= 4.8.2 - 2024-10-14 =
-* Add - Title, Description, and Gateway ID props to the express payment method.
-* Dev - Bump WooCommerce "tested up to" version 9.4.
-* Dev - Bump WooCommerce minimum supported version to 9.2.
-* Dev - Bump WordPress minimum supported version to 6.5.
-
-= 4.8.1 - 2024-09-23 =
-* Fix - Confirmation popup no longer appears when saving the Square settings.
-* Fix - Connection settings now persist previous connection when toggling between Production and Sandbox.
-* Fix - Prevent gift card image from being forced upon a site.
-* Fix - Update URL linking to Square Developer dashboard in sandbox settings.
-* Dev - Bump WooCommerce "tested up to" version 9.3.
-* Dev - Bump WooCommerce minimum supported version to 9.1.
-
-= 4.8.0 - 2024-09-16 =
-* Add - Support for the WooCommerce Product Block Editor.
-* Fix - Address a potential infinite loop issue with the `pull_inventory` step when running a manual synchronization.
-* Fix - Cancelling Google Pay on checkout shows validation errors.
-* Fix - Missing gift card order item meta during re-order.
-* Fix - Ensure we don't hardcode the database prefix in queries we run.
-* Fix - Replace the use of deprecated hook `wcs_renewal_order_meta` with `wc_subscriptions_renewal_order_data`.
-* Update - Change the business location button text based on the location count.
-* Dev - Bump WooCommerce "tested up to" version 9.2.
-* Dev - Bump WooCommerce minimum supported version to 9.0.
 
 [View historical changelog details here](https://github.com/woocommerce/woocommerce-square/blob/trunk/changelog.txt).
 
