@@ -94,6 +94,19 @@ class Payments extends \WooCommerce\Square\API\Request {
 			Utilities\Money_Utility::amount_to_money( $payment_total, $order->get_currency() )
 		);
 
+		// set tip money if available
+		$tip_total = 0;
+		foreach( $order->get_items('fee') as $item_id => $item_tip ){
+			// The fee total amount
+			$tip_total = $item_tip->get_total();
+		}
+
+		if ( $tip_total > 0 ) {
+			$this->square_request->setTipMoney(
+				Utilities\Money_Utility::amount_to_money($tip_total, $order->get_currency())
+			);
+		}
+		
 		if ( defined( 'WOOCOMMERCE_CHECKOUT' ) && WOOCOMMERCE_CHECKOUT ) {
 			$customer_details = new \Square\Models\CustomerDetails();
 			$customer_details->setCustomerInitiated( true );
