@@ -504,10 +504,6 @@ class Gateway extends Payment_Gateway_Direct {
 					$tip_total = Money_Utility::amount_to_cents( $item_tip->get_total() );
 				}
 				
-				// adjust order by difference between WooCommerce and Square order totals
-				$wc_total     = Money_Utility::amount_to_cents( $order->get_total() ) - $tip_total; // exclude tip amount from adjustment
-				$square_total = $response->getTotalMoney()->getAmount();
-				$delta_total  = $wc_total - $square_total;
 				// Create Redemption for each Square discount code on the order.
 				// Note: CalculateOrder was already called when coupons were applied; we create one redemption per code.
 				$square_discount_code_ids = Coupons::get_order_square_discount_code_ids( $order );
@@ -570,7 +566,7 @@ class Gateway extends Payment_Gateway_Direct {
 				// When Square redemption is used, pass current order so adjustment is a service charge (not discounted again); otherwise line item.
 				// This is to avoid discount applying to the adjustment again.
 				$square_coupon_in_use = ! empty( $square_discount_code_ids ) ? $response : null;
-				$wc_total             = Money_Utility::amount_to_cents( $order->get_total() );
+				$wc_total             = Money_Utility::amount_to_cents( $order->get_total() ) - $tip_total; // exclude tip amount from adjustment
 				$square_total         = $response->getTotalMoney()->getAmount();
 				$delta_total          = $wc_total - $square_total;
 
