@@ -21,6 +21,7 @@ namespace WooCommerce\Square\Gateway\API\Requests;
 
 defined( 'ABSPATH' ) || exit;
 
+use DateTime;
 use WooCommerce\Square\API;
 use WooCommerce\Square\Framework\Square_Helper;
 use WooCommerce\Square\Handlers\Product;
@@ -330,6 +331,27 @@ class Orders extends API\Request {
 			$recipient->setAddress( $pickup_address );
 
 			$pickup_details->setRecipient( $recipient );
+
+			// Add pickup time information if available.
+			$pickup_date = $order->get_meta( 'wpo_pickup_date' );
+			$pickup_time = $order->get_meta( 'wpo_pickup_time' );
+			$formatted_pickup_datetime = null;
+
+			if ( ! empty( $pickup_date ) && ! empty( $pickup_time ) ) {
+				$pickup_datetime_str = $pickup_date . ' ' . $pickup_time;
+				$pickup_datetime = date_create_from_format( 'F j, Y g:i a', $pickup_datetime_str, wp_timezone() );
+
+				if ( $pickup_datetime ) {
+					$formatted_pickup_datetime = gmdate( 'Y-m-d\TH:i:s\Z', (int) $pickup_datetime->getTimestamp() );
+				}
+			}
+
+			if ( $formatted_pickup_datetime ) {
+				$pickup_details->setIsCurbsidePickup( false );
+				$pickup_details->setPickupAt( $formatted_pickup_datetime );
+				$pickup_details->setPrepTimeDuration( 'P0DT0H40M0S' ); // prep time of 40 minutes
+				$pickup_details->setAutoCompleteDuration( 'P1D' ); // auto complete after 1 day
+			}
 
 			// Add customer note if available.
 			if ( $order->get_customer_note() ) {
@@ -646,8 +668,35 @@ class Orders extends API\Request {
 
 			$line_item->setAppliedTaxes( $applied_taxes );
 
+			// ADD METADATA AS NOTE.
+			$meta_datas = [];
+			$get_metadata = $item->get_meta_data();
+			if (!empty($get_metadata) && is_array($get_metadata)) {
+				foreach ($get_metadata as $key => $value) {
+					if ($value->key === '_addons_price') {
+						continue; // skip key _addons_price
+					}
+
+					$meta_datas[] = $value->key . ': ' . $value->value;
+				}
+			}
+			$meta_datas = implode(" | ", $meta_datas);
+
+			$line_item->setNote($meta_datas);
+
 			$api_line_items[] = $line_item;
 		}
+
+		// remove $api_line_items object if title contains 'Tip' on first line
+		$api_line_items = array_filter($api_line_items, function($line_item) {
+			if ($line_item instanceof \Square\Models\OrderLineItem) {
+				$name = $line_item->getName();
+				if (stripos($name, 'Tip') !== false) {
+					return false; // remove item
+				}
+			}
+			return true; // keep item
+		});
 
 		return $api_line_items;
 	}
