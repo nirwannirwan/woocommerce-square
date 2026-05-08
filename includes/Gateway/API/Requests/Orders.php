@@ -333,8 +333,8 @@ class Orders extends API\Request {
 			$pickup_details->setRecipient( $recipient );
 
 			// Add pickup time information if available.
-			$pickup_date = $order->get_meta( 'wpo_pickup_date' );
-			$pickup_time = $order->get_meta( 'wpo_pickup_time' );
+			$pickup_date = $order->get_meta( 'restopick_pickup_date' );
+			$pickup_time = $order->get_meta( 'restopick_pickup_time' );
 			$formatted_pickup_datetime = null;
 
 			if ( ! empty( $pickup_date ) && ! empty( $pickup_time ) ) {
